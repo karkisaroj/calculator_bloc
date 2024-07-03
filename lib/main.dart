@@ -1,4 +1,6 @@
 
+import 'dart:js_interop';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -69,6 +71,12 @@ class _MainScreenState extends State<MainScreen> {
                       TextButton(onPressed: (){
                         context.read<CounterBloc>().add(IncrementEvent(_controller.text));
                       }, child:const Text('+')),
+                      TextButton(onPressed: (){
+                        context.read<CounterBloc>().add(MultiplyEvent(_controller.text));
+                      }, child:const Text("*")),
+                      TextButton(onPressed: (){
+                        context.read<CounterBloc>().add(DivisionEvent(_controller.text));
+                      }, child:const Text("Enter"))
                     ],
                   )
                 ],
@@ -113,6 +121,16 @@ class DecrementEvent extends CounterEvent{
     const DecrementEvent (super.value); 
 }
 
+class MultiplyEvent extends CounterEvent{
+   const MultiplyEvent(super.value);
+
+}
+
+class DivisionEvent extends CounterEvent{
+  const DivisionEvent(super.value);
+
+}
+
 class CounterBloc extends Bloc<CounterEvent,CounterState>{
   CounterBloc():super(const CounterStateValid(0)){
      on<IncrementEvent>((event, emit) {
@@ -138,6 +156,30 @@ class CounterBloc extends Bloc<CounterEvent,CounterState>{
           CounterStateValid(state.value-integer),
         );
        }
-     },);
+     });
+     on<MultiplyEvent>((event,emit){
+      final integer=int.tryParse(event.value);
+      if(integer==null){
+        emit(
+          CounterStateInvalidNumber(invalidValue: event.value, previousValue:state.value)
+        );
+      }else{
+        emit(
+          CounterStateValid(state.value*integer),
+     );
+      }
+     });
+     on <DivisionEvent>((event,emit){
+      final integer=int.tryParse(event.value);
+      if(integer==null){
+        emit(
+          CounterStateInvalidNumber(invalidValue: event.value,previousValue: state.value),
+        );
+      }else{
+        emit(
+          CounterStateValid(integer),
+        );
+      }
+     });
   }
 }
